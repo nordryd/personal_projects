@@ -1,8 +1,5 @@
 package nqueens;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -12,70 +9,127 @@ import java.util.Scanner;
  */
 public class Main
 {
-	// Toggle between being submission ready or still in development.
-	private static final boolean IS_G2G_SUBMISSION_READY = false;
+	private static final boolean USE_SCANNER_FOR_INPUT = false; // BC GfG uses Scanner and Eclipse uses args[]
 	private static final int SMALLEST_NON_SINGLETON_BOARD_SIZE_WITH_SOLUTION = 4;
+	private static final String NO_SOLUTION = "-1";
+	private static final String SINGLETON_BOARD_SOLUTION = "[1 ]";
+	
+	private static String solutions;
 
 	public static void main(String[] args) {
-		Scanner stdin = IS_G2G_SUBMISSION_READY ? (new Scanner(System.in)) : null;
-		int testCases = IS_G2G_SUBMISSION_READY ? stdin.nextInt() : Integer.parseInt(args[0]);
+		Scanner stdin = USE_SCANNER_FOR_INPUT ? (new Scanner(System.in)) : null;
+		int testCases = USE_SCANNER_FOR_INPUT ? stdin.nextInt() : Integer.parseInt(args[0]);
 
 		for (int testCase = 1; testCase <= testCases; testCase++) {
-			String solutions = "";
 
-			boolean hasMoreSolutions = true;
-			while (hasMoreSolutions) {
-				int boardSize = IS_G2G_SUBMISSION_READY ? stdin.nextInt() : Integer.parseInt(args[testCase]);
-				System.out.printf("Board Size = %d\n", boardSize);
-				if (boardSize < SMALLEST_NON_SINGLETON_BOARD_SIZE_WITH_SOLUTION) {
-					System.out.println("Only one known solution.");
-					solutions = (boardSize == 1) ? "[1 ]" : "-1";
-					hasMoreSolutions = false;
+			int boardSize = USE_SCANNER_FOR_INPUT ? stdin.nextInt() : Integer.parseInt(args[testCase]);
+			System.out.printf("Board Size = %d\n", boardSize);
+			if (boardSize < SMALLEST_NON_SINGLETON_BOARD_SIZE_WITH_SOLUTION) {
+				System.out.println("Only one known solution.");
+				solutions = (boardSize == 1) ? SINGLETON_BOARD_SOLUTION : NO_SOLUTION;
+			}
+			else {
+				String queens = nQueens(boardSize);
+				if (queens.length() == 0) {
+					System.out.println(NO_SOLUTION);
 				}
 				else {
-					List<Integer> queens = nQueens(boardSize);
-					if (queens.size() != boardSize) {
-						System.out.println("End of solutions.");
-						if (solutions.equals("")) { // Full pass and no solution has been added to the solutions string, there4 no
-													// solution
-							solutions = "-1";
-						}
-
-						hasMoreSolutions = false;
-					}
-					else {
-						solutions += "[";
-						for (Integer queen : queens) {
-							solutions += queen + " ";
-						}
-						solutions += "] ";
-					}
-					break;
-				}
-
-				if (IS_G2G_SUBMISSION_READY) {
-					stdin.close();
+					// remember to increment the queen numbers (get rid of 0-indexing)
 				}
 			}
-
+			
 			System.out.println(solutions);
+		}
+
+		if (USE_SCANNER_FOR_INPUT) {
+			stdin.close();
 		}
 	}
 
-	private static List<Integer> nQueens(int boardSize) {
-		int[][] board = new int[boardSize][boardSize];
-		List<Integer> queens = new ArrayList<>();
-		
-		
+	private static String nQueens(int boardSize) {
+		boolean[][] hasQueen = new boolean[boardSize][boardSize];
+		String solutions = "", candidate = "";
 
+		for (int nextFirstQueen = 0; nextFirstQueen < boardSize; nextFirstQueen++) {
+			hasQueen[nextFirstQueen][0] = true;
+			candidate += nextFirstQueen;
+			candidate += placeNextQueen(1, hasQueen); // Next queen always starts at (0, 1) (first entry of next column)
+
+			System.out.printf("candidate.size() = %d\n", candidate.length());
+
+			if (candidate.length() == boardSize) {
+				solutions += candidate + " ";
+			}
+		}
+
+		System.out.println("Solutions = " + solutions);
+		return solutions;
+	}
+
+	private static String placeNextQueen(int nextCol, boolean[][] hasQueen) {
+		System.out.printf("Column = %d\n", nextCol);
+		String queens = "";
+		// Bottom of board reached (no solution) or end of board reached (solution
+		// found)
+		for (int nextRow = 0; nextRow < hasQueen.length; nextRow++) {
+			if (nextRow == hasQueen.length){
+				return queens;
+			}
+			
+			if(nextRow == hasQueen.length) {
+				solutions += queens + " ";
+			}
+
+			// Check if queen is safe. If yes, add queen and recurse.
+			// Upon return, restore the board to its state before the recurse.
+			// Keep a global string. i
+			if (isQueenSafe(nextRow, nextCol, hasQueen)) { // Queen may be placed here. Reset row, next column
+				hasQueen[nextRow][nextCol] = true;
+				queens += placeNextQueen(nextCol + 1, hasQueen);
+				
+				hasQueen[nextRow][nextCol] = false;
+			}
+
+		}
+		System.out.println(queens);
 		return queens;
 	}
-	
-	private static List<Integer> placeNextQueen(int nextCol, int[][] board){
-		
-	}
-	
-	private static boolean isQueenVulnerable(int row, int col, int[][] board) {
-		
+
+	private static boolean isQueenSafe(int queenRow, int queenCol, boolean[][] hasQueen) {
+		// Horizontal
+		for (int col = 0; col < queenCol; col++) {
+			if (hasQueen[queenRow][col]) {
+				return false;
+			}
+		}
+
+		// Vertical
+		for (int row = 0; row < queenRow; row++) {
+			if (hasQueen[row][queenCol]) {
+				return false;
+			}
+		}
+
+		// Down Diagonal
+		int row = queenRow, col = queenCol;
+		while ((row >= 0) && (col >= 0)) {
+			if (hasQueen[row][col]) {
+				return false;
+			}
+			row--;
+			col--;
+		}
+
+		// Up Diagonal
+		row = queenRow;
+		col = queenCol;
+		while ((row < hasQueen.length) && (col >= 0)) {
+			if (hasQueen[row][col]) {
+				return false;
+			}
+			row++;
+			col--;
+		}
+		return true;
 	}
 }
