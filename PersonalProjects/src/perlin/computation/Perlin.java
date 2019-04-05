@@ -2,21 +2,15 @@ package perlin.computation;
 
 import java.util.Random;
 
+import perlin.util.Values;
+
 /**
- * Class to generate Perlin noise at a given point. (update later to return a
- * matrix?)
+ * Class to generate a matrix of Perlin noise.
  * 
  * @author nordryd
  */
 public class Perlin
 {
-	private static final int MAX = 255;
-	private static final int DEFAULT_OCTAVES = 1;
-	private static final double DEFAULT_PERSIST = 0.1;
-	
-	private static final double START_AMPLITUDE = 1;
-	private static final double START_FREQUENCY = 1;
-
 	// Hash lookup table as defined by Ken Perlin. This is a randomly arranged array
 	// of all numbers from 0-255 inclusive.
 	private static final int[] PERMUTATION = { 151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7, 225,
@@ -45,7 +39,7 @@ public class Perlin
 	 * @return Perlin noise matrix.
 	 */
 	public static double[][] generateNoise(int xLen, int yLen) {
-		return generateNoise(xLen, yLen, DEFAULT_OCTAVES, DEFAULT_PERSIST);
+		return generateNoise(xLen, yLen, Values.DEFAULT_OCTAVES, Values.DEFAULT_PERSIST);
 	}
 
 	/**
@@ -60,7 +54,7 @@ public class Perlin
 	public static double[][] generateNoise(int xLen, int yLen, int octaves, double persistence) {
 		double[][] matrix = new double[xLen][yLen];
 
-		if (octaves <= DEFAULT_OCTAVES) {
+		if (octaves <= Values.DEFAULT_OCTAVES) {
 			for (int row = 0; row < xLen; row++) {
 				for (int col = 0; col < yLen; col++) {
 					matrix[row][col] = perlin(row * RAND.nextDouble(), col * RAND.nextDouble(),
@@ -82,8 +76,8 @@ public class Perlin
 
 	private static double perlin(double inX, double inY, double inZ, int octaves, double persistence) {
 		double total = 0;
-		double frequency = START_FREQUENCY;
-		double amplitude = START_AMPLITUDE;
+		double frequency = Values.START_FREQUENCY;
+		double amplitude = Values.START_AMPLITUDE;
 		double maxValue = 0; // used for normalizing result to 0.0 - 1.0
 
 		for (int octave = 0; octave < octaves; octave++) {
@@ -110,9 +104,9 @@ public class Perlin
 		// Calculate the "unit cube" that the point asked will be located in. The left
 		// bound is ( [_x_], [_y_], [_z_] ) and the right bound is that plus 1. Next we
 		// calculate the location (from 0.0 to 1.0) in that cube.
-		int xi = ((int) x) & MAX;
-		int yi = ((int) y) & MAX;
-		int zi = ((int) z) & MAX;
+		int xi = ((int) x) & Values.MAX;
+		int yi = ((int) y) & Values.MAX;
+		int zi = ((int) z) & Values.MAX;
 		double xf = x - ((int) x);
 		double yf = y - ((int) y);
 		double zf = z - ((int) z);
@@ -220,7 +214,7 @@ public class Perlin
 		RAND = new Random(System.currentTimeMillis());
 		P = new int[PERMUTATION.length * 2];
 		for (int i = 0; i < P.length; i++) {
-			P[i] = PERMUTATION[i % (MAX + 1)];
+			P[i] = PERMUTATION[i % (Values.MAX + 1)];
 		}
 	}
 }

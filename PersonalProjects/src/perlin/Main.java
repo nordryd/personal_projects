@@ -2,6 +2,10 @@ package perlin;
 
 import perlin.computation.Perlin;
 
+/**
+ * Main class for the Perlin Noise program.
+ * @author Nordryd
+ */
 public class Main
 {
 	public static void main(String[] args) {
