@@ -1,4 +1,4 @@
-package nqueens;
+package chess.nqueens;
 
 import java.util.Scanner;
 
